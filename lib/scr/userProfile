@@ -1,0 +1,110 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:ikwimpay/providers/auth_provider.dart';
+import 'package:ikwimpay/scr/login.dart';
+
+class ProfileSection extends StatefulWidget {
+  const ProfileSection({Key? key}) : super(key: key);
+
+  @override
+  _ProfileSectionState createState() => _ProfileSectionState();
+}
+
+class _ProfileSectionState extends State<ProfileSection> {
+  bool _isShowingCredentials = false;
+
+  @override
+  Widget build(BuildContext context) {
+    // Get user data from the AuthProvider
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.user;
+
+    return Container(
+      color: const Color(0xFFA50000),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Profile and Logo Row
+             
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 1.0, vertical: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Profile Icon with credentials popup
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isShowingCredentials = !_isShowingCredentials;
+                        print("Showing credentials: $_isShowingCredentials");
+                      });
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1),
+                      ),
+                      child: const Icon(Icons.person, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Credentials popup
+            if (_isShowingCredentials)
+              Container(
+                margin: const EdgeInsets.only(left: 16, top: 8),
+                padding: const EdgeInsets.all(12),
+                width: 200,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 1,
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user?.fName.toString() ?? "User Name",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Divider(),
+                    const SizedBox(height: 4),
+                    GestureDetector(
+                      onTap: () {
+                        authProvider.logout();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        );
+                      },
+                      child: const Text(
+                        "Sign Out",
+                        style: TextStyle(
+                          color: Color(0xFFA50000),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,30 @@
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+
+class POSPrinter {
+  BlueThermalPrinter printer = BlueThermalPrinter.instance;
+
+  Future<void> connectToPrinter() async {
+    List<BluetoothDevice> devices = await printer.getBondedDevices();
+    if (devices.isNotEmpty) {
+      await printer.connect(devices.first);
+    }
+  }
+
+  Future<void> printReceipt(Map<String, dynamic> transaction) async {
+    if (!(await printer.isConnected)) {
+      await connectToPrinter();
+    }
+
+    printer.printNewLine();
+    printer.printCustom("TRANSACTION RECEIPT", 2, 1); // Size 2, Centered
+    printer.printNewLine();
+    printer.printLeftRight("Plate No:", transaction['plate_no'] ?? 'N/A');
+    printer.printLeftRight("Quantity:", "${transaction['quantity'] ?? 0} L");
+    printer.printLeftRight("Item:", transaction['item'] ?? 'N/A');
+    printer.printLeftRight("Amount:", transaction['formatted_amount'] ?? 'Unknown');
+    printer.printLeftRight("Date:", DateTime.now().toString().substring(0, 16));
+    printer.printNewLine();
+    printer.printNewLine();
+    printer.paperCut(); // If supported
+  }
+}

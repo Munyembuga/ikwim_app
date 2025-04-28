@@ -1,0 +1,41 @@
+// File: fix_mlkit_namespace.gradle
+// This script fixes namespace issues for Google ML Kit modules
+
+gradle.projectsEvaluated {
+    rootProject.subprojects { project ->
+        project.afterEvaluate {
+            if (project.name.startsWith('google_mlkit_') && project.plugins.hasPlugin('com.android.library')) {
+                try {
+                    // Map of specific module names to their proper namespaces
+                    def namespaceMap = [
+                        'google_mlkit_commons': 'com.google.mlkit.vision.common',
+                        'google_mlkit_text_recognition': 'com.google.mlkit.vision.text.recognition',
+                        'google_mlkit_face_detection': 'com.google.mlkit.vision.face.detection',
+                        'google_mlkit_barcode_scanning': 'com.google.mlkit.vision.barcode.scanning',
+                        'google_mlkit_digital_ink_recognition': 'com.google.mlkit.vision.digitalink.recognition',
+                        'google_mlkit_image_labeling': 'com.google.mlkit.vision.image.labeling',
+                        'google_mlkit_object_detection': 'com.google.mlkit.vision.object.detection',
+                        'google_mlkit_pose_detection': 'com.google.mlkit.vision.pose.detection',
+                        'google_mlkit_selfie_segmentation': 'com.google.mlkit.vision.selfie.segmentation',
+                        'google_mlkit_smart_reply': 'com.google.mlkit.smart.reply',
+                        'google_mlkit_translation': 'com.google.mlkit.translation',
+                        'google_mlkit_language_id': 'com.google.mlkit.language.id',
+                        'google_mlkit_entity_extraction': 'com.google.mlkit.entity.extraction'
+                    ]
+                    
+                    // Set namespace from map or generate a default one
+                    def namespace = namespaceMap[project.name]
+                    if (!namespace) {
+                        namespace = 'com.google.mlkit.' + project.name.replace('google_mlkit_', '').replace('_', '.')
+                    }
+                    
+                    // Apply the namespace
+                    project.android.namespace = namespace
+                    println "✓ Set namespace for ${project.name}: ${namespace}"
+                } catch (Exception e) {
+                    println "✗ Error setting namespace for ${project.name}: ${e.message}"
+                }
+            }
+        }
+    }
+}
